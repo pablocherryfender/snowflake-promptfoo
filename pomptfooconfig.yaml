@@ -1,0 +1,37 @@
+provider:
+  - name: snowflake
+    command: python snowflake_provider.py
+
+prompts: |
+  {{system}}
+  {{input}}
+
+vars:
+  system: |
+    You are a helpful assistant that always responds in JSON format.
+    Include 'sentiment' (string) and 'confidence' (float) in your response.
+
+tests:
+  - description: "Test positive sentiment"
+    vars:
+      input: "Analyze: I love this product!"
+    assert:
+      - type: json
+        value: $.output
+      - type: equals
+        value: $.output.sentiment
+        equals: "positive"
+      - type: number
+        value: $.output.confidence
+        greaterThan: 0.5
+
+outputSchema:
+  type: object
+  properties:
+    sentiment:
+      type: string
+      enum: ["positive", "negative", "neutral"]
+    confidence:
+      type: number
+      minimum: 0
+      maximum: 1
